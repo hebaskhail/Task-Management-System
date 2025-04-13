@@ -1,7 +1,4 @@
-import {
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { ConsoleLogger, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -22,12 +19,15 @@ export class UsersService {
     return await this.userRepository.find();
   }
 
-  async findById(id: string): Promise<User | undefined> {
+  async findUser(id: string): Promise<User> {
     const user = await this.userRepository.findOne({
       where: { id },
     });
 
-    if (!user) throw new NotFoundException('User Not Found');
+    if (!user) {
+      throw new NotFoundException(`User not found`);
+    }
+    console.log('user', user);
     return user;
   }
 
@@ -37,6 +37,4 @@ export class UsersService {
     });
     return user;
   }
-
-  
 }
