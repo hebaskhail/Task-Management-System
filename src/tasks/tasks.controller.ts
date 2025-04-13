@@ -1,34 +1,67 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Req,
+  UseInterceptors,
+  Query,
+  Put,
+} from '@nestjs/common';
 import { TasksService } from './tasks.service';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
+import { ExtendedRequest } from '../types/express/index';
+import { PaginationInterceptor } from '../common/interceptors/pagintation.interceptor';
+import { FindAllTasksDto } from './dto/find-all-tasks.dto';
 
 @Controller('tasks')
 export class TasksController {
   constructor(private readonly tasksService: TasksService) {}
 
   @Post()
-  create(@Body() createTaskDto: CreateTaskDto) {
-    return this.tasksService.create(createTaskDto);
+  create(@Body() createTaskDto: CreateTaskDto, @Req() req: ExtendedRequest) {
+    const user = req.user;
+    return this.tasksService.create(createTaskDto, user);
   }
 
   @Get()
-  findAll() {
-    return this.tasksService.findAll();
+  @UseInterceptors(PaginationInterceptor)
+  findAllTasks(
+    @Req() req: ExtendedRequest,
+    @Query() findAllTasksDto: FindAllTasksDto,
+  ) {
+    return this.tasksService.findAllTasks(findAllTasksDto, req);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.tasksService.findOne(+id);
+  findOne(@Param('id') id: string, @Req() req: ExtendedRequest) {
+    const user = req.user.sub;
+    return this.tasksService.findOne(id, user);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateTaskDto: UpdateTaskDto) {
-    return this.tasksService.update(+id, updateTaskDto);
+  @Put(':id')
+  update(
+    @Param('id') id: string,
+    @Body() updateTaskDto: UpdateTaskDto,
+    @Req() req: ExtendedRequest,
+  ) {
+    const user = req.user.sub;
+    return this.tasksService.update(id, updateTaskDto, user);
   }
 
+  @Put('mark-completed/:id')
+  markCompleted(@Param('id') id: string, @Req() req: ExtendedRequest) {
+    const user = req.user.sub;
+
+    return this.tasksService.markAsCompleted(id, user);
+  }
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.tasksService.remove(+id);
+  remove(@Param('id') id: string, @Req() req: ExtendedRequest) {
+    const user = req.user.sub;
+    return this.tasksService.remove(id, user);
   }
 }
