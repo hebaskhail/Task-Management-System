@@ -3,6 +3,7 @@ import {
   ExecutionContext,
   Injectable,
   NestInterceptor,
+  LoggerService
 } from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -18,7 +19,9 @@ export interface Response<T> {
 export class TransformInterceptor<T>
   implements NestInterceptor<T, Response<T>>
 {
-  logger: any;
+  constructor(
+    private readonly logger: LoggerService,
+  ) {}
   intercept(
     context: ExecutionContext,
     next: CallHandler,
@@ -33,13 +36,12 @@ export class TransformInterceptor<T>
       )} | Query: ${JSON.stringify(query)} | Body: ${JSON.stringify(body)}`,
       'HTTP Request',
     );
-
     return next.handle().pipe(
       map((data) => ({
         statusCode: res.statusCode,
         status: 'Success',
-        data: data.data,
-        message: data.message || 'Success',
+        data: data,
+        message: data?.message || 'Success',
       })),
     );
   }
