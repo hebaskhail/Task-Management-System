@@ -26,7 +26,6 @@ export class TransformInterceptor<T>
     const req = context.switchToHttp().getRequest();
     const res = context.switchToHttp().getResponse();
     const { method, url, body, query, params } = req;
-    const now = Date.now();
 
     this.logger.log(
       `Request: ${method} ${url} | Params: ${JSON.stringify(
