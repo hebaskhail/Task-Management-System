@@ -1,6 +1,6 @@
 import { NestFactory, Reflector } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { BadRequestException, Logger, ValidationPipe } from '@nestjs/common';
+import { Logger, ValidationPipe } from '@nestjs/common';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { AuthGuard } from './common/guards/auth.guard';
 import { JwtService } from '@nestjs/jwt';
@@ -23,7 +23,7 @@ async function bootstrap() {
 
   app.useGlobalGuards(new AuthGuard(new JwtService(), new Reflector()));
 
-  app.useGlobalInterceptors(new TransformInterceptor( new Logger()));
+  app.useGlobalInterceptors(new TransformInterceptor(new Logger()));
 
   await app.listen(process.env.PORT ?? 3000);
 }
